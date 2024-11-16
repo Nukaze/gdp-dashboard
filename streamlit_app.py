@@ -92,7 +92,8 @@ if not len(countries):
 selected_countries = st.multiselect(
     'Which countries would you like to view?',
     countries,
-    ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
+    ["THA", "SGP", "USA", "CHN", "IND", "JPN", "DEU", "FRA", "GBR"]
+)
 
 ''
 ''
