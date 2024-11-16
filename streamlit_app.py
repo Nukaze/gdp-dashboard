@@ -58,6 +58,7 @@ def get_gdp_data():
 
     return gdp_df
 
+
 gdp_df = get_gdp_data()
 
 # -----------------------------------------------------------------------------
@@ -94,12 +95,9 @@ countries_string = [f'{code} - {name}' for code, name in countries_dict.items()]
 
 
 if not len(countries_string):
-    st.warning("Select at least one country")
+    st.warning("No countries found in the data")
 
-selected_countries = st.multiselect(
-    'Which countries would you like to view?',
-    countries_string,
-    [
+default_countries = [
         "THA - Thailand", 
         "SGP - Singapore", 
         "USA - United States", 
@@ -109,13 +107,38 @@ selected_countries = st.multiselect(
         "DEU - Germany", 
         "FRA - France", 
         "GBR - United Kingdom"
-    ]
+]
+
+
+max_selected_countries = 20
+if "selected_countries" not in st.session_state:
+    # Initialize the selected default countries list
+    st.session_state.selected_countries = default_countries
+
+def update_selected_countries():
+    selected = st.session_state.selected_countries
+    if len(selected) > max_selected_countries:
+        st.session_state.selected_countries = selected[:max_selected_countries]
+        st.toast(f"Please select no more than {max_selected_countries} countries.", icon='⚠️')
+        return
+
+selected_countries = st.multiselect(
+    'Which countries would you like to view?',
+    countries_string,
+    key='selected_countries',
+    on_change=update_selected_countries
 )
 
+# Ensure the selected countries list is updated correctly
+selected_countries = st.session_state.selected_countries
+
+
+    
 ''
 ''
 ''
 selected_countries = pd.Series(selected_countries).map(lambda x: x.split(' - ')[0])
+selected_countries_length = selected_countries.count()
 
 # Filter the data
 filtered_gdp_df = gdp_df[
@@ -124,7 +147,9 @@ filtered_gdp_df = gdp_df[
     & (from_year <= gdp_df['Year'])
 ]
 
-st.header('GDP over time', divider='gray')
+
+
+st.header(f'({selected_countries_length}) GDP over time', divider='gray')
 
 ''
 
@@ -142,7 +167,7 @@ st.line_chart(
 first_year = gdp_df[gdp_df['Year'] == from_year]
 last_year = gdp_df[gdp_df['Year'] == to_year]
 
-st.header(f'GDP in {to_year}', divider='gray')
+st.header(f'({selected_countries_length}) GDP from {from_year} to {to_year}', divider='gray')
 
 ''
 
